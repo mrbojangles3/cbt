@@ -46,8 +46,6 @@ class Iomixbench(Benchmark):
     def initialize(self):
         super(Iomixbench, self).initialize()
 
-        # DELETE MEEEEE!!!!!
-        return True
         logger.info('Running scrub monitoring.')
         monitoring.start("%s/scrub_monitoring" % self.run_dir)
         self.cluster.check_scrub()
@@ -85,11 +83,11 @@ class Iomixbench(Benchmark):
         else:
             wr_client_arr = []
 
-        if(del_client_arr or rr_client_arr or sr_clients_arr ):
+        if(del_client_arr or rr_client_arr or sr_client_arr ):
             logger.info("Pre-Populating cluster")
             self._pre_populate(del_client_arr, rr_client_arr, sr_client_arr)
 
-        self._run(wr_client_arr, del_client_arr, rr_client_arr, sr_clients_arr)
+        self._run(wr_client_arr, del_client_arr, rr_client_arr, sr_client_arr)
 
     def _pre_populate(self,del_client_arr, rr_client_arr, sr_client_arr):
         # loop through the arrays generating data
