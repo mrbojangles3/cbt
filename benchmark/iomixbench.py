@@ -12,13 +12,15 @@ from benchmark import Benchmark
 
 logger = logging.getLogger("cbt")
 
-
-
 class Iomixbench(Benchmark):
 
     def __init__(self, cluster, config):
         super(Iomixbench, self).__init__(cluster, config)
 
+        # config.get comes from the benchmark settings
+        # settings.get comes from the cluster section
+        # My changes require adding the fucntion of each host in the cluster
+        # section, not the benchmark section
         self.tmp_conf = self.cluster.tmp_conf
         self.time =  str(config.get('time', '300'))
         self.concurrent_procs = config.get('concurrent_procs', 1)
@@ -27,10 +29,10 @@ class Iomixbench(Benchmark):
         self.write_only = config.get('write_only', False) #FIXME should be eliminated
         self.op_size = config.get('op_size', 4194304)
         self.pool_profile = config.get('pool_profile', 'default')
-        self.write_clients = config.get('write_clients',None )
-        self.rand_read_clients = config.get('rand_read_clients', None)
-        self.seq_read_clients = config.get('seq_read_clients', None)
-        self.delete_clients = config.get('delete_clients',None)
+        self.write_clients = settings.getnodes('write_clients', None )
+        self.rand_read_clients = settings.getnodes('rand_read_clients', None)
+        self.seq_read_clients = settings.getnodes('seq_read_clients', None)
+        self.delete_clients = settings.getnodes('delete_clients',None)
 
         self.run_dir = '%s/osd_ra-%08d/op_size-%08d/concurrent_ops-%08d/pool_profile-%s' % (self.run_dir, int(self.osd_ra), int(self.op_size), int(self.concurrent_ops), self.pool_profile)
         self.out_dir = '%s/osd_ra-%08d/op_size-%08d/concurrent_ops-%08d/pool_profile-%s' % (self.archive_dir, int(self.osd_ra), int(self.op_size), int(self.concurrent_ops), self.pool_profile)
@@ -87,10 +89,10 @@ class Iomixbench(Benchmark):
             logger.info("Pre-Populating cluster")
             self._pre_populate(del_client_arr, rr_client_arr, sr_client_arr)
 
+        logger.info("Starting Rados Bench ")
         self._run(wr_client_arr, del_client_arr, rr_client_arr, sr_client_arr)
 
     def _pre_populate(self,del_client_arr, rr_client_arr, sr_client_arr):
-        # loop through the arrays generating data
 
         pool_name = 'rados-bench-cbt'
         op_size_str = '-b %s' % self.op_size
@@ -99,6 +101,7 @@ class Iomixbench(Benchmark):
         ps = []
         concurrent_ops_str = '--concurrent-ios %s' % self.concurrent_ops
         logger.info('Pre-Population IO is run for 1.5x as long as the benchmark, to ensure sufficient data is available')
+
         logger.info('Launching pre-population for Delete IO')
         for i in xrange(len(del_client_arr)):
             objecter_log = '%s/objecter.%s.log' % (self.run_dir, i)
@@ -106,7 +109,6 @@ class Iomixbench(Benchmark):
             cmd_str = '%s -c %s -p %s bench %s %s %s %s %s --no-cleanup --show-time 2> %s' %\
                     (self.cmd_path_full, self.tmp_conf, pool_name, run_time, mode, op_size_str, concurrent_ops_str, run_name, objecter_log)
 
-            logger.info(cmd_str)
             p = common.pdsh(del_client_arr[i], cmd_str)
             ps.append(p)
 
@@ -117,7 +119,6 @@ class Iomixbench(Benchmark):
             cmd_str = '%s -c %s -p %s bench %s %s %s %s %s --no-cleanup --show-time 2> %s' %\
                     (self.cmd_path_full, self.tmp_conf, pool_name, run_time, mode, op_size_str, concurrent_ops_str, run_name, objecter_log)
 
-            logger.info(cmd_str)
             p = common.pdsh(rr_client_arr[i], cmd_str)
             ps.append(p)
 
@@ -128,16 +129,15 @@ class Iomixbench(Benchmark):
             cmd_str = '%s -c %s -p %s bench %s %s %s %s %s --no-cleanup --show-time 2> %s' %\
                     (self.cmd_path_full, self.tmp_conf, pool_name, run_time, mode, op_size_str, concurrent_ops_str, run_name, objecter_log)
 
-            logger.info(cmd_str)
             p = common.pdsh(sr_client_arr[i], cmd_str)
             ps.append(p)
 
         # wait for all the commands to finish
         for p in ps:
-            p.wait()
+            p.communicate()
         logger.info('Pre-population IO Complete')
 
-    def _run(self, mode, run_dir, out_dir):
+    def _run(self, wr_client_arr, del_client_arr, rr_client_arr, sr_client_arr):
         # Can just call rados -p pool_name cleanup --run_name
 
         # We'll always drop caches for rados bench
@@ -147,19 +147,21 @@ class Iomixbench(Benchmark):
             concurrent_ops_str = '--concurrent-ios %s' % self.concurrent_ops
         op_size_str = '-b %s' % self.op_size
 
-        common.make_remote_dir(run_dir)
+        # Make the remote directories on the clients for data collection
+        for i in ['rand','seq','write','delete']:
+            common.pdsh(settings.getnodes('clients'), 'mkdir -p -m0755 -- %s/%s' % (self.run_dir, i )).communicate()
 
         # dump the cluster config
-        self.cluster.dump_config(run_dir)
+        self.cluster.dump_config(self.run_dir)
 
         # Run the backfill testing thread if requested
         if 'recovery_test' in self.cluster.config:
             recovery_callback = self.recovery_callback
-            self.cluster.create_recovery_test(run_dir, recovery_callback)
+            self.cluster.create_recovery_test(self.run_dir, recovery_callback)
 
         # Run rados bench
-        self.cluster.collect_ceph_configs(run_dir, "ceph_settings_before")
-        monitoring.start(run_dir)
+        self.cluster.collect_ceph_configs(self.run_dir, "ceph_settings_before")
+        monitoring.start(self.run_dir)
         logger.info('Running radosbench tests.')
         ps = []
         pool_name = 'rados-bench-cbt'
@@ -179,7 +181,6 @@ class Iomixbench(Benchmark):
             p = common.pdsh(del_client_arr[i], cmd_str)
             ps.append(p)
 
-        logger.info('Launching pre-population for Rand Read IO')
 
         mode = 'rand'
         for i in xrange(len(rr_client_arr)):
@@ -193,7 +194,6 @@ class Iomixbench(Benchmark):
             p = common.pdsh(rr_client_arr[i], cmd_str)
             ps.append(p)
 
-        logger.info('Launching pre-population for Seq Read IO')
         mode = 'seq'
         for i in xrange(len(sr_client_arr)):
             out_file = '%s/%s/output.%s' % (self.run_dir,mode, i)
@@ -215,11 +215,11 @@ class Iomixbench(Benchmark):
                     (self.cmd_path_full, self.tmp_conf, pool_name, self.time, mode, op_size_str, concurrent_ops_str, run_name, objecter_log, out_file)
 
             logger.info(cmd_str)
-            p = common.pdsh(sr_client_arr[i], cmd_str)
+            p = common.pdsh(wr_client_arr[i], cmd_str)
             ps.append(p)
         # wait for all the commands to finish
         for p in ps:
-            p.wait()
+            p.communicate()
 
         ## THERE IT WENT
 #        for i in xrange(self.concurrent_procs):
@@ -237,16 +237,16 @@ class Iomixbench(Benchmark):
 #            ps.append(p)
 #        for p in ps:
 #            p.wait()
-        monitoring.stop(run_dir)
-        self.cluster.collect_ceph_configs(run_dir, "ceph_settings_after")
+        monitoring.stop(self.run_dir)
+        self.cluster.collect_ceph_configs(self.run_dir, "ceph_settings_after")
 
         # If we were doing recovery, wait until it's done.
         if 'recovery_test' in self.cluster.config:
             self.cluster.wait_recovery_done()
 
         # Finally, get the historic ops
-        self.cluster.dump_historic_ops(run_dir)
-        common.sync_files('%s/*' % run_dir, out_dir)
+        self.cluster.dump_historic_ops(self.run_dir)
+        common.sync_files('%s/*' % self.run_dir,self.out_dir)
 
     def mkpools(self):
         monitoring.start("%s/pool_monitoring" % self.run_dir)
