@@ -264,5 +264,10 @@ class Iomixbench(Benchmark):
     def recovery_callback(self): 
         common.pdsh(settings.getnodes('clients'), 'sudo killall -9 rados').communicate()
 
+# Make sure you have launched the IO from a system other than the clients or the results will be deleted!
+# Also must use /tmp/cbt for tmp dir
+    def cleanup(self):
+        common.pdsh(settings.getnodes('clients','mons','osds','rgws','mds'),'rm -rf /tmp/cbt')
+
     def __str__(self):
         return "%s\n%s\n%s" % (self.run_dir, self.out_dir, super(Iomixbench, self).__str__())
