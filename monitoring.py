@@ -8,6 +8,9 @@ def start(directory):
     # perf_dir = '%s/perf' % directory
     # blktrace_dir = '%s/blktrace' % directory
 
+    # ceph -w
+    common.pdsh(settings.getnodes('head'),'sudo ceph  -w > %s/ceph-w &' % (directory))
+
     # collectl
     common.pdsh(nodes, 'mkdir -p -m0755 -- %s' % collectl_dir)
     common.pdsh(nodes, 'collectl -s+CDMJNYZ -o 2cu --utc --plot --rawtoo -i 1:10 -F0 -f %s' % collectl_dir)
@@ -32,6 +35,7 @@ def stop(directory=None):
     if directory:
         sc = settings.cluster
         common.pdsh(nodes, 'cd %s/perf;sudo chown %s.%s perf.data' % (directory, sc.get('user'), sc.get('user')))
+        common.pdsh(settings.getnodes('head'),"pkill -f 'python /usr/bin/ceph -w'").poll()
         make_movies(directory)
 
 
