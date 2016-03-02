@@ -1,0 +1,56 @@
+---
+cluster:
+  user: 'aquari'
+  head: "node0"
+  clients: ["client1","client2","client3"]
+  osds: ["node4","node58","node60","node26","node28","node74","node34"]
+  mons: ["node0","node28","node6"]
+  write_clients: ["client1","client2"]
+  seq_read_clients: ["client3"]
+  osds_per_node: 10
+  fs: 'xfs'
+  mkfs_opts: '-f -i size=2048 -n size=8k'
+  mount_opts: 'noatime,nodiratime,attr2,logbufs=8,logbsize=256k,largeio,inode64,swalloc'
+  conf_file: '/etc/ceph/ceph.conf'
+  iterations: 1
+  use_existing: True
+  rebuild_every_test: True
+  clusterid: "site-hybrid"
+  tmp_dir: "/tmp/cbt"
+  pool_profiles:
+    rbd2rep:
+      pg_size: 4096 # Wes Calc says 16384,ceph complains
+      pgp_size: 4096 # Wes Calc says 16384,ceph complains
+      replication: 2
+    rbd3rep:
+      pg_size: 4096
+      pgp_size: 4096
+      replication: 3
+    erasure3_2:
+      pg_size: 4096
+      pgp_size: 4096
+      replication: 'erasure'
+      erasure_profile: 'ec32'
+    erasure4_2:
+      pg_size: 4096
+      pgp_size: 4096
+      replication: 'erasure'
+      erasure_profile: 'ec42'
+  erasure_profiles:
+    ec42:
+      erasure_k: 4
+      erasure_m: 2
+    ec32:
+      erasure_k: 3
+      erasure_m: 2
+benchmarks:
+  iomixbench:
+    time: 600
+    pool_per_proc: False
+    op_size: [4194304,1048576,262144]
+    # Number of rados bench procceses generating concurrent_ops
+    concurrent_procs: 1
+    # Number of threads passed to rados bench cmd
+    concurrent_ops: 64
+    osd_ra: [0]
+    pool_profile: ['erasure4_2','rbd2rep','rbd3rep']
