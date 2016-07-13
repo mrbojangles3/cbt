@@ -1,0 +1,29 @@
+cluster:
+  head: "aquari@rhclient0"
+  clients: ["aquari@rhclient1","aquari@rhclient1","aquari@rhclient2","aquari@rhclient3","aquari@rhclient4","aquari@rhclient5","aquari@rhclient6","aquari@rhclient7","aquari@rhclient8","aquari@rhclient9"]
+  iterations: 1 
+  rebuild_every_test: False
+  use_existing: True
+  tmp_dir: "/tmp/cbt"
+benchmarks:
+  stdfiobench:
+    concurrent_procs: [1]
+    run_time: 60
+    ramp_time: 0 # defaults to zero
+    nrfiles: 10000 # defaults to zero
+    directory: '/mnt/'
+    iodepth: [1] # using the sync ioengine
+    numjobs: 10000
+    filesize: '500m-3g'
+    mode: ['rw,readwrite']
+    rwmixread: 50 
+    ioengine: 'sync'
+    op_size: [524228,1048576,2097152,4194304] # Block size in Bytes
+    vol_size: 106444 # Volume size in MB, ignored by logan
+    fio_path: '/usr/bin/fio' # Path to fio command on the remote machine
+    block_device: 'scinia' # Just provide block device name ex: 'sdc' , do not prefix '/dev/'
+    mount_point_name: '/mnt/stdfiobench' # Directory where block device must be mounted
+    filesystem: 'xfs'
+    use_existing: True 
+    client_ra: 0
+    output_format: 'terse' # 'normal' , 'json', 'terse'(default, supports parsing using tools/cbt_fio_terse_parser.py)
