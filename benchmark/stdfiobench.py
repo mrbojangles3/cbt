@@ -18,6 +18,9 @@ class StdFioBench(Benchmark):
         self.total_procs = self.concurrent_procs * len(settings.getnodes('clients').split(','))
         self.time =  str(config.get('run_time', '10'))
         self.ramp = str(config.get('ramp_time', '0'))
+        self.nrfiles = str(config.get('nrfiles', '0'))
+        self.filesize = config.get('filesize', '1g'))
+        self.directory = config.get('directory', '/tmp/')
         self.iodepth = config.get('iodepth', 16)
         self.numjobs = config.get('numjobs', 1)
         self.mode = config.get('mode', 'write')
@@ -56,8 +59,8 @@ class StdFioBench(Benchmark):
         for i in xrange(1):
              letter = string.ascii_lowercase[i+1]
 	     if not self.use_existing:
-               common.pdsh(settings.getnodes('clients'), 'sudo umount -f %s' % (self.block_dev_name)).communicate()
-               common.pdsh(settings.getnodes('clients'), 'sudo mkfs.%s -f  %s' % (self.filesystem, self.block_dev_name)).communicate()
+             common.pdsh(settings.getnodes('clients'), 'sudo umount -f %s' % (self.block_dev_name)).communicate()
+             common.pdsh(settings.getnodes('clients'), 'sudo mkfs.%s -f  %s' % (self.filesystem, self.block_dev_name)).communicate()
              common.pdsh(settings.getnodes('clients'), 'sudo mkdir -p %s ' % (self.mount_point_name)).communicate()
              common.pdsh(settings.getnodes('clients'), 'sudo mount -t %s -o noatime %s %s' % (self.filesystem, self.block_dev_name, self.mount_point_name)).communicate()
              common.pdsh(settings.getnodes('clients'), 'sudo mkdir -p %s/`hostname -s`-%d' % (self.mount_point_name, i)).communicate()
@@ -66,15 +69,15 @@ class StdFioBench(Benchmark):
         common.make_remote_dir(self.run_dir)
 
         # populate the fio files
-        logger.info('Attempting to populating fio files...')
-        pre_cmd = 'sudo %s --rw=write --ioengine=sync --numjobs=%s --bs=8M --size %dM %s > /dev/null ' % (self.fio_cmd, self.numjobs, self.vol_size, self.names)
-        common.pdsh(settings.getnodes('clients'), pre_cmd).communicate()
+        #logger.info('Attempting to populating fio files...')
+        #pre_cmd = 'sudo %s --rw=write --ioengine=sync --numjobs=%s --bs=8M --size %dM %s > /dev/null ' % (self.fio_cmd, self.numjobs, self.vol_size, self.names)
+        #common.pdsh(settings.getnodes('clients'), pre_cmd).communicate()
 
 
     def run(self):
         super(StdFioBench, self).run()
         # Set client readahead
-        self.set_client_param('read_ahead_kb', self.client_ra)
+        #self.set_client_param('read_ahead_kb', self.client_ra)
 
         # We'll always drop caches for rados bench
         self.dropcaches()
@@ -88,15 +91,18 @@ class StdFioBench(Benchmark):
         if (self.mode == 'readwrite' or self.mode == 'randrw'):
             fio_cmd += ' --rwmixread=%s --rwmixwrite=%s' % (self.rwmixread, self.rwmixwrite)
         fio_cmd += ' --ioengine=%s' % self.ioengine
-        fio_cmd += ' --runtime=%s' % self.time
+        #fio_cmd += ' --runtime=%s' % self.time
         fio_cmd += ' --ramp_time=%s' % self.ramp
-        fio_cmd += ' --numjobs=%s' % self.numjobs
+        fio_cmd += ' --nrfiles=%s' % self.nrfiles
+        fio_cmd += ' --filesize=%s' % self.filesize
+        fio_cmd += ' --directory=%s' % self.directory
+        #fio_cmd += ' --numjobs=%s' % self.numjobs
         fio_cmd += ' --direct=1'
-        fio_cmd += ' --randrepeat=0'
+        #fio_cmd += ' --randrepeat=0'
         fio_cmd += ' --group_reporting'
         fio_cmd += ' --bs=%dB' % self.op_size
         fio_cmd += ' --iodepth=%d' % self.iodepth
-        fio_cmd += ' --size=%dM' % self.vol_size 
+        #fio_cmd += ' --size=%dM' % self.vol_size 
         fio_cmd += ' --output-format=%s' % self.output_format
         if (self.output_format == 'normal'):
           fio_cmd += ' --write_iops_log=%s' % out_file 
