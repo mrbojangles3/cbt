@@ -1,6 +1,6 @@
 cluster:
-  head: "aquari@rhclient0"
-  clients: ["aquari@rhclient1","aquari@rhclient1","aquari@rhclient2","aquari@rhclient3","aquari@rhclient4","aquari@rhclient5","aquari@rhclient6","aquari@rhclient7","aquari@rhclient8","aquari@rhclient9"]
+  head: "aquari@client-5"
+  clients: ["aquari@client-5","aquari@client-6","aquari@client-7","aquari@client-8"]
   iterations: 1 
   rebuild_every_test: False
   use_existing: True
@@ -14,15 +14,16 @@ benchmarks:
     directory: '/mnt/'
     iodepth: [1] # using the sync ioengine
     numjobs: 10000
+    fallocate: 'posix'
     filesize: '500m-3g'
-    mode: ['rw,readwrite']
+    mode: ['readwrite']
     rwmixread: 50 
     ioengine: 'sync'
     op_size: [524228,1048576,2097152,4194304] # Block size in Bytes
     vol_size: 106444 # Volume size in MB, ignored by logan
     fio_path: '/usr/bin/fio' # Path to fio command on the remote machine
-    block_device: 'scinia' # Just provide block device name ex: 'sdc' , do not prefix '/dev/'
-    mount_point_name: '/mnt/stdfiobench' # Directory where block device must be mounted
+    #block_device: 'scinia' # Just provide block device name ex: 'sdc' , do not prefix '/dev/'
+    #mount_point_name: '/mnt/stdfiobench' # Directory where block device must be mounted
     filesystem: 'xfs'
     use_existing: True 
     client_ra: 0

@@ -19,10 +19,11 @@ class StdFioBench(Benchmark):
         self.time =  str(config.get('run_time', '10'))
         self.ramp = str(config.get('ramp_time', '0'))
         self.nrfiles = str(config.get('nrfiles', '0'))
-        self.filesize = config.get('filesize', '1g'))
+        self.filesize = config.get('filesize', '1g')
         self.directory = config.get('directory', '/tmp/')
         self.iodepth = config.get('iodepth', 16)
         self.numjobs = config.get('numjobs', 1)
+        self.fallocate = config.get('fallocate', 'none')
         self.mode = config.get('mode', 'write')
         self.rwmixread = config.get('rwmixread', 50)
         self.rwmixwrite = 100 - self.rwmixread
@@ -33,7 +34,7 @@ class StdFioBench(Benchmark):
         self.fio_cmd = config.get('fio_path', '/usr/bin/fio')
         self.block_dev_name = config.get('block_device', 'vd')
         self.block_device = config.get('block_device', 'vd')
-        self.mount_point_name = config.get('mount_point_name', '/mnt/stdfiobench')
+        self.mount_point_name = config.get('mount_point_name', 'fio')
         self.filesystem = config.get('filesystem', 'xfs')
         self.use_existing = config.get('use_existing', 'False')
         self.output_format = config.get('output_format', 'terse')
@@ -44,7 +45,7 @@ class StdFioBench(Benchmark):
 
         self.names = ''
         for i in xrange(self.concurrent_procs):
-            self.names += '--name=%s/`hostname -s`-0/cbt-stdfiobench-%d ' % (self.mount_point_name, i)
+            self.names += '--name=`hostname -s`-0-cbt-stdfiobench-%d ' % (i)
     
         self.block_dev_name = '/dev/' + self.block_dev_name
 
@@ -59,11 +60,11 @@ class StdFioBench(Benchmark):
         for i in xrange(1):
              letter = string.ascii_lowercase[i+1]
 	     if not self.use_existing:
-             common.pdsh(settings.getnodes('clients'), 'sudo umount -f %s' % (self.block_dev_name)).communicate()
-             common.pdsh(settings.getnodes('clients'), 'sudo mkfs.%s -f  %s' % (self.filesystem, self.block_dev_name)).communicate()
-             common.pdsh(settings.getnodes('clients'), 'sudo mkdir -p %s ' % (self.mount_point_name)).communicate()
-             common.pdsh(settings.getnodes('clients'), 'sudo mount -t %s -o noatime %s %s' % (self.filesystem, self.block_dev_name, self.mount_point_name)).communicate()
-             common.pdsh(settings.getnodes('clients'), 'sudo mkdir -p %s/`hostname -s`-%d' % (self.mount_point_name, i)).communicate()
+		     common.pdsh(settings.getnodes('clients'), 'sudo umount -f %s' % (self.block_dev_name)).communicate()
+		     common.pdsh(settings.getnodes('clients'), 'sudo mkfs.%s -f  %s' % (self.filesystem, self.block_dev_name)).communicate()
+		     common.pdsh(settings.getnodes('clients'), 'sudo mkdir -p %s ' % (self.mount_point_name)).communicate()
+		     common.pdsh(settings.getnodes('clients'), 'sudo mount -t %s -o noatime %s %s' % (self.filesystem, self.block_dev_name, self.mount_point_name)).communicate()
+		     common.pdsh(settings.getnodes('clients'), 'sudo mkdir -p %s/`hostname -s`-%d' % (self.mount_point_name, i)).communicate()
 
         # Create the run directory
         common.make_remote_dir(self.run_dir)
@@ -86,16 +87,17 @@ class StdFioBench(Benchmark):
 
         time.sleep(5)
         out_file = '%s/output' % self.run_dir
-        fio_cmd = 'sudo %s' % self.fio_cmd
+        fio_cmd = '%s' % self.fio_cmd
         fio_cmd += ' --rw=%s' % self.mode
         if (self.mode == 'readwrite' or self.mode == 'randrw'):
             fio_cmd += ' --rwmixread=%s --rwmixwrite=%s' % (self.rwmixread, self.rwmixwrite)
         fio_cmd += ' --ioengine=%s' % self.ioengine
-        #fio_cmd += ' --runtime=%s' % self.time
-        fio_cmd += ' --ramp_time=%s' % self.ramp
+        fio_cmd += ' --runtime=%s' % self.time
+        #fio_cmd += ' --ramp_time=%s' % self.ramp
         fio_cmd += ' --nrfiles=%s' % self.nrfiles
         fio_cmd += ' --filesize=%s' % self.filesize
         fio_cmd += ' --directory=%s' % self.directory
+	fio_cmd += ' --fallocate=%s' % self.fallocate
         #fio_cmd += ' --numjobs=%s' % self.numjobs
         fio_cmd += ' --direct=1'
         #fio_cmd += ' --randrepeat=0'
