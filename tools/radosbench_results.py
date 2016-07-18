@@ -24,6 +24,7 @@ def parse_rados_bench(group):
         iotype = base_path.split(os.sep)[-1]
         parsed_io[iotype]
         curr_MB = []
+        curr_IOPS = []
         avg_lat = -1.0
         min_lat = -1.0
         max_lat = -1.0
@@ -35,6 +36,9 @@ def parse_rados_bench(group):
                 line = f.readline()
                 if "sec Cur ops" in line:
                     break
+		if line == '':
+		    print "End of file encountered, unexpectedly"
+		    sys.exit(1)
 
             for line in f:
                 # bypass the rados bench live terminal output
@@ -47,10 +51,12 @@ def parse_rados_bench(group):
                 try:
                     # other needed columns should be added here
                     curr_MB.append(float(line[7]))
+		    curr_IOPS.append(int(line[4]) - int(line[5]))
                 except ValueError:
                     # we hit a - in the file
                     # which means this runs needs another look
-                    cur_MB.append(0.0)
+                    curr_MB.append(0.0)
+                    cur_IOPS.append(0)
                     continue
 
             #parse the latency calculated by rados bench
@@ -65,7 +71,7 @@ def parse_rados_bench(group):
                 if line[0].lower() == 'min latency':
                     min_lat=float(line[1])
 
-        parsed_io[iotype].append([sum(curr_MB)/len(curr_MB), min_lat, max_lat, avg_lat]) 
+        parsed_io[iotype].append([sum(curr_MB)/len(curr_MB), min_lat, max_lat, avg_lat,sum(curr_IOPS)/len(curr_IOPS)]) 
     return parsed_io
 
 def usage():
@@ -76,7 +82,7 @@ def usage():
         2. path to search
         3. number of clients generating io
     Example invocation:
-    ./radosbench_results.py "output*" /home/username/perf-results/iomix_3_seq_read/
+    ./radosbench_results.py "output*" /home/username/perf-results/iomix_3_seq_read/ 6
     You need quote or escape your regex for the filename pattern.
     I am using python fnmatch under the covers, those regex rules apply
     '''
@@ -88,6 +94,7 @@ def sum_results(results):
         min_lat = 0.0
         max_lat = 0.0
         avg_lat = 0.0
+	iops = 0
         if key == 'delete':
             print('delete IO stats are not captured')
             continue
@@ -96,9 +103,10 @@ def sum_results(results):
             min_lat += data[1]
             max_lat += data[2]
             avg_lat += data[3]
+            iops += data[4]
         print(key)
         print(calc_per_node_bw(bw,6), min_lat/len(results[key]),\
-                max_lat/len(results[key]), avg_lat/len(results[key]))
+                max_lat/len(results[key]), avg_lat/len(results[key]), iops)
 
 def calc_per_node_bw(bw, nodes):
     bits_per_MiB = 8.0 * 1024 * 1024
