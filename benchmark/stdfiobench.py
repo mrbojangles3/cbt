@@ -23,6 +23,7 @@ class StdFioBench(Benchmark):
         self.directory = config.get('directory', '/tmp/')
         self.iodepth = config.get('iodepth', 16)
         self.numjobs = config.get('numjobs', 1)
+        self.direct_io = config.get('direct', 1)
         self.fallocate = config.get('fallocate', 'none')
         self.mode = config.get('mode', 'write')
         self.rwmixread = config.get('rwmixread', 50)
@@ -99,7 +100,7 @@ class StdFioBench(Benchmark):
         fio_cmd += ' --directory=%s' % self.directory
 	fio_cmd += ' --fallocate=%s' % self.fallocate
         #fio_cmd += ' --numjobs=%s' % self.numjobs
-        fio_cmd += ' --direct=1'
+        fio_cmd += ' --direct=%s' % self.direct_io
         #fio_cmd += ' --randrepeat=0'
         fio_cmd += ' --group_reporting'
         fio_cmd += ' --bs=%dB' % self.op_size

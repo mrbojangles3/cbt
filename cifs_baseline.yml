@@ -10,13 +10,14 @@ benchmarks:
     concurrent_procs: [1]
     run_time: 60
     ramp_time: 0 # defaults to zero
-    nrfiles: 10000 # defaults to zero
+    nrfiles: 100 # defaults to zero
     directory: '/mnt/'
     iodepth: [1] # using the sync ioengine
-    numjobs: 10000
+    numjobs: 100
+    direct: 0
     fallocate: 'posix'
     filesize: '500m-3g'
-    mode: ['readwrite']
+    mode: ['rw']
     rwmixread: 50 
     ioengine: 'sync'
     op_size: [524228,1048576,2097152,4194304] # Block size in Bytes
