@@ -80,14 +80,14 @@ def usage():
     3 arguments needed:
         1. File name pattern
         2. path to search
-        3. number of clients generating io
+        3. number of data nodes
     Example invocation:
     ./radosbench_results.py "output*" /home/username/perf-results/iomix_3_seq_read/ 6
     You need quote or escape your regex for the filename pattern.
     I am using python fnmatch under the covers, those regex rules apply
     '''
 
-def sum_results(results,clients):
+def sum_results(results,data_nodes):
     ''' Taking in a dictionary with iotypes as keys, 2d array as values'''
     for key in results.iterkeys():
         bw = 0.0
@@ -105,8 +105,8 @@ def sum_results(results,clients):
             avg_lat += data[3]
             iops += data[4]
         print(key)
-        print(calc_per_node_bw(bw,clients), min_lat/len(results[key]),\
-                max_lat/len(results[key]), avg_lat/len(results[key]), iops)
+        print(calc_per_node_bw(bw,data_nodes), min_lat/len(results[key]),\
+                max_lat/len(results[key]), avg_lat/len(results[key]), (iops))
 
 def calc_per_node_bw(bw, nodes):
     bits_per_MiB = 8.0 * 1024 * 1024
@@ -125,12 +125,12 @@ def grouper(paths, clients):
 
 
 def main(argv):
-    clients = int(argv[2])
+    data_nodes = int(argv[2])
     results_path = find(argv[0], argv[1])
     results_path.sort()
     for i in grouper(results_path,clients):
         parsed_results = parse_rados_bench(i)
-        sum_results(parsed_results,clients)
+        sum_results(parsed_results,data_nodes)
         print '-='*40
     
 
