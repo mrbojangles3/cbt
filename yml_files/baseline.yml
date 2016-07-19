@@ -47,6 +47,7 @@ benchmarks:
     write_only: False # this seems to only do seq reads
     pool_per_proc: False
     op_size: [4194304,1048576]
+    readmode: ['seq','rand']
     # Number of rados bench procceses generating concurrent_ops
     concurrent_procs: 1
     # Number of threads passed to rados bench cmd
