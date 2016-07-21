@@ -88,7 +88,7 @@ def usage():
     I am using python fnmatch under the covers, those regex rules apply
     '''
 
-def sum_results(results,data_nodes,clients):
+def sum_results(results,data_nodes):
     ''' Taking in a dictionary with iotypes as keys, 2d array as values'''
     for key in results.iterkeys():
         bw = 0.0
@@ -106,8 +106,11 @@ def sum_results(results,data_nodes,clients):
             avg_lat += data[3]
             iops += data[4]
         print(key)
-        print(calc_per_node_bw(bw,data_nodes), min_lat/len(results[key]),\
-                max_lat/len(results[key]), avg_lat/len(results[key]), (iops/clients))
+        print(calc_per_node_bw(bw,data_nodes),\
+		'{0:.6f}'.format(min_lat/len(results[key])),\
+                '{0:.6f}'.format(max_lat/len(results[key])),\
+		'{0:.6f}'.format(avg_lat/len(results[key])),\
+		(iops))
 
 def calc_per_node_bw(bw, nodes):
     bits_per_MiB = 8.0 * 1024 * 1024
@@ -132,7 +135,7 @@ def main(argv):
     results_path.sort()
     for i in grouper(results_path,clients):
         parsed_results = parse_rados_bench(i)
-        sum_results(parsed_results,data_nodes,clients)
+        sum_results(parsed_results,data_nodes)
         print '-='*40
     
 
