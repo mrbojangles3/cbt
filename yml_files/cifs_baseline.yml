@@ -1,6 +1,7 @@
 cluster:
   head: "aquari@client-5"
-  clients: ["aquari@client-5","aquari@client-6","aquari@client-7","aquari@client-8"]
+  clients: ["aquari@client-1","aquari@client-2","aquari@client-3","aquari@client-4","aquari@client-5","aquari@client-6","aquari@client-7","aquari@client-8"]
+  fos: "fos-1"
   iterations: 1 
   rebuild_every_test: False
   use_existing: True
@@ -8,17 +9,17 @@ cluster:
 benchmarks:
   stdfiobench:
     concurrent_procs: [1]
-    run_time: 60 # not effective for sync io engine
+    run_time: 600 # not effective for sync io engine
     ramp_time: 0 # defaults to zero
-    nrfiles: 100 # defaults to zero
+    nrfiles: 0 # defaults to zero
     directory: '/mnt/'
     iodepth: [1] # using the sync ioengine
-    numjobs: 100
+    numjobs: 50
     direct: 0
     fallocate: 'posix'
-    filesize: '500m-3g'
+    filesize: '500m-1g'
     mode: ['rw']
-    rwmixread: 50 
+    rwmixread: [80,50,20]
     ioengine: 'sync'
     op_size: [1048576,4194304] # Block size in Bytes
     vol_size: 106444 # Volume size in MB, ignored by logan

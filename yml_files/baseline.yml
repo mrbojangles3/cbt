@@ -1,10 +1,10 @@
 ---
 cluster:
   user: 'aquari'
-  head: "mon-01"
-  clients: ["client1","client2","client3"]
-  osds: ["data-01","data-02","data-03","data-04","data-05","data-06"]
-  mons: ["mon-01","mon-02","mon-03"]
+  head: "client-5"
+  clients: ["client-1","client-2","client-3","client-4","client-5","client-6","client-7","client-8"]
+  osds: ["data-1","data-2","data-3","data-4","data-5","data-6"]
+  mons: ["mon-1","mon-2","mon-3"]
   osds_per_node: 10
   fs: 'xfs'
   mkfs_opts: '-f -i size=2048 -n size=8k'

@@ -41,8 +41,8 @@ class StdFioBench(Benchmark):
         self.output_format = config.get('output_format', 'terse')
 
         # FIXME there are too many permutations, need to put results in SQLITE3 
-        self.run_dir = '%s/osd_ra-%08d/client_ra-%08d/op_size-%08d/concurrent_procs-%03d/iodepth-%03d/%s' % (self.run_dir, int(self.osd_ra), int(self.client_ra), int(self.op_size), int(self.total_procs), int(self.iodepth), self.mode)
-        self.out_dir = '%s/osd_ra-%08d/client_ra-%08d/op_size-%08d/concurrent_procs-%03d/iodepth-%03d/%s' % (self.archive_dir, int(self.osd_ra), int(self.client_ra), int(self.op_size), int(self.total_procs), int(self.iodepth), self.mode)
+        self.run_dir = '%s/osd_ra-%08d/client_ra-%08d/op_size-%08d/concurrent_procs-%03d/iodepth-%03d/rwmixread-%s/%s' % (self.run_dir, int(self.osd_ra), int(self.client_ra), int(self.op_size), int(self.total_procs), int(self.iodepth), self.rwmixread, self.mode)
+        self.out_dir = '%s/osd_ra-%08d/client_ra-%08d/op_size-%08d/concurrent_procs-%03d/iodepth-%03d/rwmixread-%s/%s' % (self.archive_dir, int(self.osd_ra), int(self.client_ra), int(self.op_size), int(self.total_procs), int(self.iodepth),self.rwmixread, self.mode)
 
         self.names = ''
         for i in xrange(self.concurrent_procs):
@@ -95,11 +95,11 @@ class StdFioBench(Benchmark):
         fio_cmd += ' --ioengine=%s' % self.ioengine
         fio_cmd += ' --runtime=%s' % self.time
         #fio_cmd += ' --ramp_time=%s' % self.ramp
-        fio_cmd += ' --nrfiles=%s' % self.nrfiles
+        #fio_cmd += ' --nrfiles=%s' % self.nrfiles
         fio_cmd += ' --filesize=%s' % self.filesize
         fio_cmd += ' --directory=%s' % self.directory
 	fio_cmd += ' --fallocate=%s' % self.fallocate
-        #fio_cmd += ' --numjobs=%s' % self.numjobs
+        fio_cmd += ' --numjobs=%s' % self.numjobs
         fio_cmd += ' --direct=%s' % self.direct_io
         #fio_cmd += ' --randrepeat=0'
         fio_cmd += ' --group_reporting'
@@ -135,9 +135,11 @@ class StdFioBench(Benchmark):
 
     def cleanup(self):
          super(StdFioBench, self).cleanup()
-         common.pdsh(settings.getnodes('clients'), 'sudo rm -rf %s/`hostname -s`*' % (self.mount_point_name)).communicate()
+         common.pdsh(settings.getnodes('clients'), 'sudo rm -rf %s/`hostname -s`*' % (self.directory)).communicate()
+         common.pdsh(settings.getnodes('mons','osds','clients'), 'sudo rm -rf /tmp/cbt').communicate()
          if not self.use_existing:
            common.pdsh(settings.getnodes('clients'), 'sudo umount -f %s' % (self.block_dev_name)).communicate()
+           common.pdsh(settings.getnodes('mons','osds','clients'), 'sudo rm -rf /tmp/cbt').communicate()
 
     def set_client_param(self, param, value):
          cmd = 'sudo sh -c "echo %s > /sys/block/%s/queue/%s"' % (value, self.block_device, param)
