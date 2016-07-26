@@ -41,12 +41,12 @@ def rscp(node, remotefile, localfile):
 
 def make_remote_dir(remote_dir):
     logger.info('Making remote directory: %s', remote_dir)
-    nodes = settings.getnodes('clients', 'osds', 'mons', 'rgws', 'mds')
+    nodes = settings.getnodes('clients', 'osds', 'mons', 'rgws', 'mds','fos')
     pdsh(nodes, 'mkdir -p -m0755 -- %s' % remote_dir).communicate()
 
 
 def sync_files(remote_dir, local_dir):
-    nodes = settings.getnodes('clients', 'osds', 'mons', 'rgws', 'mds')
+    nodes = settings.getnodes('clients', 'osds', 'mons', 'rgws', 'mds','fos')
 
     if not os.path.exists(local_dir):
         os.makedirs(local_dir)

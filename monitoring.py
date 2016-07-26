@@ -3,7 +3,7 @@ import settings
 
 
 def start(directory):
-    nodes = settings.getnodes('clients', 'osds', 'mons', 'rgws')
+    nodes = settings.getnodes('clients', 'osds', 'mons', 'rgws','fos')
     collectl_dir = '%s/collectl' % directory
     # perf_dir = '%s/perf' % directory
     # blktrace_dir = '%s/blktrace' % directory
@@ -24,15 +24,15 @@ def start(directory):
 
 
 def stop(directory=None):
-    nodes = settings.getnodes('clients', 'osds', 'mons', 'rgws')
+    nodes = settings.getnodes('clients', 'osds', 'mons', 'rgws','fos')
 
     common.pdsh(nodes, 'pkill -SIGINT -f collectl').communicate()
-    common.pdsh(nodes, 'sudo pkill -SIGINT -f perf_3.6').communicate()
-    common.pdsh(settings.getnodes('osds'), 'sudo pkill -SIGINT -f blktrace').communicate()
-    if directory:
-        sc = settings.cluster
-        common.pdsh(nodes, 'cd %s/perf;sudo chown %s.%s perf.data' % (directory, sc.get('user'), sc.get('user')))
-        make_movies(directory)
+    #common.pdsh(nodes, 'sudo pkill -SIGINT -f perf_3.6').communicate()
+    #common.pdsh(settings.getnodes('osds'), 'sudo pkill -SIGINT -f blktrace').communicate()
+    #if directory:
+    #    sc = settings.cluster
+    #    common.pdsh(nodes, 'cd %s/perf;sudo chown %s.%s perf.data' % (directory, sc.get('user'), sc.get('user')))
+    #    make_movies(directory)
 
 
 def make_movies(directory):
