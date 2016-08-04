@@ -88,19 +88,20 @@ def sum_results(results,data_nodes):
             write_stddev_lat += data[10]
             write_iops += data[11]
         print(key)
-	print "Avg client read bandwidth MiB/s: " + str((read_bw / len(results[key]))/1024)
-	print "Avg client read min latency msec: " + str(read_min_lat / len(results[key]))
-	print "Avg client read max latency msec: " + str(read_max_lat / len(results[key]))
-	print "Avg client read avg latency msec: " + str(read_avg_lat / len(results[key]))
-	print "Avg client read stddev latency msec: " + str(read_stddev_lat / len(results[key]))
-	print "Avg client read iops:" + str(read_iops / len(results[key]))
+	print "Avg client read bandwidth MiB/s: %.2f" % ((read_bw / len(results[key]))/1024)
+	print "Avg client read min,max,avg,stddev sec: %.3f, %.3f, %.3f, %.3f" % ((read_min_lat / len(results[key]))/1000,(read_max_lat / len(results[key]))/1000,(read_avg_lat / len(results[key]))/1000,(read_stddev_lat / len(results[key]))/1000)
+	#print "Avg client read max latency msec: " + str(read_max_lat / len(results[key]))
+	#print "Avg client read avg latency msec: " + str(read_avg_lat / len(results[key]))
+	#print "Avg client read stddev latency msec: " + str(read_stddev_lat / len(results[key]))
+	print "Avg client read iops: %.2f" % (read_iops / len(results[key]))
 	print
-	print "Avg client write bandwidth MiB/s: " + str((write_bw / len(results[key]))/1024)
-	print "Avg client write min latency msec: " + str(write_min_lat / len(results[key]))
-	print "Avg client write max latency msec: " + str(write_max_lat / len(results[key]))
-	print "Avg client write avg latency msec: " + str(write_avg_lat / len(results[key]))
-	print "Avg client write stddev latency msec: " + str(write_stddev_lat / len(results[key]))
-	print "Avg client write iops: " + str(write_iops / len(results[key]))
+	print "Avg client write bandwidth MiB/s: %.2f" % ((write_bw / len(results[key]))/1024)
+	print "Avg client write min,max,avg,stddev sec: %.3f, %.3f, %.3f, %.3f" % ((write_min_lat / len(results[key]))/1000,(write_max_lat / len(results[key]))/1000,(write_avg_lat / len(results[key]))/1000,(write_stddev_lat / len(results[key]))/1000)
+	#print "Avg client write min latency msec: " + str(write_min_lat / len(results[key]))
+	#print "Avg client write max latency msec: " + str(write_max_lat / len(results[key]))
+	#print "Avg client write avg latency msec: " + str(write_avg_lat / len(results[key]))
+	#print "Avg client write stddev latency msec: " + str(write_stddev_lat / len(results[key]))
+	print "Avg client write iops: %.2f" % (write_iops / len(results[key]))
 
 def calc_per_node_bw(bw, nodes):
     bits_per_MiB = 8.0 * 1024 * 1024
