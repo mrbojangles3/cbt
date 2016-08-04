@@ -1,7 +1,9 @@
 cluster:
   head: "aquari@client-5"
   clients: ["aquari@client-1","aquari@client-2","aquari@client-3","aquari@client-4","aquari@client-5","aquari@client-6","aquari@client-7","aquari@client-8"]
-  fos: "fos-1"
+  fos: ["fos-1"]
+  osds: ["aquari@data-1","aquari@data-2","aquari@data-3","aquari@data-4","aquari@data-5","aquari@data-6"]
+  mons: ["aquari@mon-1","aquari@mon-2","aquari@mon-3"]
   iterations: 1 
   rebuild_every_test: False
   use_existing: True
@@ -19,7 +21,7 @@ benchmarks:
     fallocate: 'posix'
     filesize: '500m-1g'
     mode: ['rw']
-    rwmixread: [80,50,20]
+    rwmixread: [100,80,50,20,0]
     ioengine: 'sync'
     op_size: [1048576,4194304] # Block size in Bytes
     vol_size: 106444 # Volume size in MB, ignored by logan
@@ -29,4 +31,4 @@ benchmarks:
     filesystem: 'xfs' # not used
     use_existing: True 
     client_ra: 0
-    output_format: 'terse' # 'normal' , 'json', 'terse'(default, supports parsing using tools/cbt_fio_terse_parser.py)
+    output_format: 'json' # 'normal' , 'json', 'terse'(default, supports parsing using tools/cbt_fio_terse_parser.py)
