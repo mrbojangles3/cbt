@@ -28,9 +28,10 @@ class Radosbench(Benchmark):
         self.op_size = config.get('op_size', 4194304)
         self.object_set_id = config.get('object_set_id', '')
         self.pool_profile = config.get('pool_profile', 'default')
+        self.readmode = config.get('readmode', 'seq')
 
-        self.run_dir = '%s/osd_ra-%08d/op_size-%08d/concurrent_ops-%08d/pool_profile-%s' % (self.run_dir, int(self.osd_ra), int(self.op_size), int(self.concurrent_ops), self.pool_profile)
-        self.out_dir = '%s/osd_ra-%08d/op_size-%08d/concurrent_ops-%08d/pool_profile-%s' % (self.archive_dir, int(self.osd_ra), int(self.op_size), int(self.concurrent_ops), self.pool_profile)
+        self.run_dir = '%s/osd_ra-%08d/op_size-%08d/concurrent_ops-%08d/pool_profile-%s/io_mode-%s' % (self.run_dir, int(self.osd_ra), int(self.op_size), int(self.concurrent_ops), self.pool_profile, self.readmode)
+        self.out_dir = '%s/osd_ra-%08d/op_size-%08d/concurrent_ops-%08d/pool_profile-%s/io_mode-%s' % (self.archive_dir, int(self.osd_ra), int(self.op_size), int(self.concurrent_ops), self.pool_profile, self.readmode)
         self.cmd_path = config.get('cmd_path', '/usr/bin/rados')
         self.pool = config.get('target_pool', 'rados-bench-cbt')
         self.readmode = config.get('readmode', 'seq')
