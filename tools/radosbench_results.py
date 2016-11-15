@@ -62,13 +62,13 @@ def parse_rados_bench(group):
             #parse the latency calculated by rados bench
             for line in f:
                 line = line.split(':')
-                if line[0].lower() == 'average latency':
+                if 'average latency' in line[0].lower():
                     avg_lat=float(line[1])
 
-                if line[0].lower() == 'max latency':
+                if 'max latency' in line[0].lower():
                     max_lat=float(line[1])
 
-                if line[0].lower() == 'min latency':
+                if 'min latency' in line[0].lower():
                     min_lat=float(line[1])
 
         parsed_io[iotype].append([sum(curr_MB)/len(curr_MB), min_lat, max_lat, avg_lat,sum(curr_IOPS)/len(curr_IOPS)]) 
