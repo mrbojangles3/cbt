@@ -106,10 +106,11 @@ def sum_results(results,data_nodes):
             avg_lat += data[3]
             iops += data[4]
         print(key)
+	# convert rados bench seconds to milliseconds
         print(calc_per_node_bw(bw,data_nodes),\
-		'{0:.6f}'.format(min_lat/len(results[key])),\
-                '{0:.6f}'.format(max_lat/len(results[key])),\
-		'{0:.6f}'.format(avg_lat/len(results[key])),\
+		'{0:.3f}ms'.format(min_lat/len(results[key])*1000),\
+                '{0:.3f}ms'.format(max_lat/len(results[key])*1000),\
+		'{0:.3f}ms'.format(avg_lat/len(results[key])*1000),\
 		(iops))
 
 def calc_per_node_bw(bw, nodes):
