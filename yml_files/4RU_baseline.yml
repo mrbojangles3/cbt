@@ -1,0 +1,56 @@
+---
+cluster:
+  user: 'aquari'
+  head: "client-1"
+  clients: ["client-1","client-2","client-3","client-4"]
+  osds: ["data-1","data-2","data-3","data-4","data-5","data-6"]
+  mons: ["mon-1","mon-2","mon-3"]
+  osds_per_node: 30
+  fs: 'xfs'
+  mkfs_opts: '-f -i size=2048 -n size=8k'
+  mount_opts: 'noatime,nodiratime,attr2,logbufs=8,logbsize=256k,largeio,inode64,swalloc'
+  conf_file: '/etc/ceph/ceph.conf'
+  iterations: 1
+  use_existing: True
+  rebuild_every_test: True
+  clusterid: "site-hybrid"
+  tmp_dir: "/tmp/cbt"
+  pool_profiles:
+    rbd2rep:
+      pg_size: 16384
+      pgp_size: 16384
+      replication: 2
+    rbd3rep:
+      pg_size: 16384
+      pgp_size: 16384
+      replication: 3
+    erasure3_2:
+      pg_size: 4096
+      pgp_size: 4096
+      replication: 'erasure'
+      erasure_profile: 'ec32'
+    erasure4_2:
+      pg_size: 8192
+      pgp_size: 8192
+      replication: 'erasure'
+      erasure_profile: 'ec42'
+  erasure_profiles:
+    ec42:
+      erasure_k: 4
+      erasure_m: 2
+    ec32:
+      erasure_k: 3
+      erasure_m: 2
+benchmarks:
+  radosbench:
+    time: 600
+    write_only: False # this seems to only do seq reads
+    pool_per_proc: False
+    op_size: [4194304,1048576]
+    readmode: ['seq','rand']
+    # Number of rados bench procceses generating concurrent_ops
+    concurrent_procs: 1
+    # Number of threads passed to rados bench cmd
+    concurrent_ops: 128
+    osd_ra: [0]
+    pool_profile: ['erasure4_2','rbd2rep','rbd3rep']
