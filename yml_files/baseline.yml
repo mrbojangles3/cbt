@@ -1,7 +1,7 @@
 ---
 cluster:
   user: 'aquari'
-  head: "client-5"
+  head: "client-1"
   clients: ["client-1","client-2","client-3","client-4","client-5","client-6","client-7","client-8"]
   osds: ["data-1","data-2","data-3","data-4","data-5","data-6"]
   mons: ["mon-1","mon-2","mon-3"]
