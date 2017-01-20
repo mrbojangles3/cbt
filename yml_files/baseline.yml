@@ -16,11 +16,11 @@ cluster:
   clusterid: "site-hybrid"
   tmp_dir: "/tmp/cbt"
   pool_profiles:
-    rbd2rep:
+    rep2:
       pg_size: 4096 
       pgp_size: 4096 
       replication: 2
-    rbd3rep:
+    rep3:
       pg_size: 4096
       pgp_size: 4096
       replication: 3
