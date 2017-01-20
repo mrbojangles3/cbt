@@ -53,4 +53,4 @@ benchmarks:
     # Number of threads passed to rados bench cmd
     concurrent_ops: 128
     osd_ra: [0]
-    pool_profile: ['erasure4_2','rbd2rep','rbd3rep']
+    pool_profile: ['erasure4_2','rep2','rep3']
