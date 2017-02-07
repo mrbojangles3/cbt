@@ -99,7 +99,7 @@ def usage():
     3 arguments needed:
         1. File name pattern
         2. path to search
-        3. number of clients generating IO
+        3. number of rados bench instances generating IO
         4. number of data nodes
     Example invocation:
     ./radosbench_results.py "output.0.*" /home/username/perf-results/iomix_3_seq_read/ 4 6
