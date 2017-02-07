@@ -3,7 +3,7 @@
 import os
 import fnmatch
 import sys
-import itertools 
+import itertools
 from collections import defaultdict
 
 # Thanks stackoverflow!
@@ -22,8 +22,6 @@ def simple_percentile(arr, num):
     arr.sort()
     key  = int(len(arr)  * float(num)) # int() rounds down
     return arr[key]
-    
-	
 
 def parse_rados_bench(group):
     '''
@@ -71,7 +69,7 @@ def parse_rados_bench(group):
                     # other needed columns should be added here
                     curr_MB.append(float(line[7]))
                     curr_LAT.append(float(line[8]))
-		    curr_IOPS.append(int(line[4]) - int(line[5]))
+                    curr_IOPS.append(int(line[4]) - int(line[5]))
                 except ValueError:
                     # we hit a - in the file
                     # which means this runs needs another look
@@ -117,8 +115,8 @@ def sum_results(results,data_nodes):
         min_lat = 0.0
         max_lat = 0.0
         avg_lat = 0.0
-	iops = 0
-	percentile = 0.0
+        iops = 0
+        percentile = 0.0
         if key == 'delete':
             print('delete IO stats are not captured')
             continue
@@ -131,15 +129,15 @@ def sum_results(results,data_nodes):
             percentile += data[5]
         print(key)
         # convert rados bench seconds to millisecondsrint(key)
-	try:
-        print(calc_per_node_bw(bw,data_nodes),\
-		'{0:.3f}ms'.format(min_lat/len(results[key])*1000),\
-                '{0:.3f}ms'.format(max_lat/len(results[key])*1000),\
-		'{0:.3f}ms'.format(avg_lat/len(results[key])*1000),\
-			(iops),\
-			'{0:.3f}ms'.format(percentile/len(results[key])*1000))
-	except ZeroDivisionError:
-		print("Hit a divide by zero, there are issues")
+        try:
+            print(calc_per_node_bw(bw,data_nodes),\
+            '{0:.3f}ms'.format(min_lat/len(results[key])*1000),\
+            '{0:.3f}ms'.format(max_lat/len(results[key])*1000),\
+            '{0:.3f}ms'.format(avg_lat/len(results[key])*1000),\
+            (iops),\
+            '{0:.3f}ms'.format(percentile/len(results[key])*1000))
+        except ZeroDivisionError:
+            print("Hit a divide by zero, there are issues")
 
 def calc_per_node_bw(bw, nodes):
     bits_per_MiB = 8.0 * 1024 * 1024
@@ -162,11 +160,14 @@ def main(argv):
     data_nodes = int(argv[3])
     results_path = find(argv[0], argv[1])
     results_path.sort()
+    # Parses all files that match the user input pattern for a given IO type
+    # e.g. output.0.client-1 and output.1.client-1 are parsed if they are
+    # in the same directory and match the given input pattern
     for i in grouper(results_path,clients):
         parsed_results = parse_rados_bench(i)
         sum_results(parsed_results,data_nodes)
         print '-='*40
-    
+
 
 if __name__ == '__main__':
     if(len(sys.argv) != 5):
