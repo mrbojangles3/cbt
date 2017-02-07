@@ -1,0 +1,66 @@
+---
+cluster:
+  user: 'aquari'
+  head: "client-1-4ru"
+  clients: ["client-1-4ru","client-2-4ru","client-3-4ru","client-4-4ru","client-5-4ru","client-6-4ru","client-7-4ru","client-8-4ru","client-9-4ru","client-10-4ru","client-11-4ru","client-12-4ru","fos-1-4ru","mon-3-4ru"]
+  osds: ["data-1-4ru","data-2-4ru","data-3-4ru","data-4-4ru","data-5-4ru","data-6-4ru","data-7-4ru","data-8-4ru","data-9-4ru","data-10-4ru"]
+  mons: ["mon-1-4ru","mon-2-4ru","mon-3-4ru"]
+  osds_per_node: 30
+  fs: 'xfs'
+  mkfs_opts: '-f -i size=2048 -n size=8k'
+  mount_opts: 'noatime,nodiratime,attr2,logbufs=8,logbsize=256k,largeio,inode64,swalloc'
+  conf_file: '/etc/ceph/ceph.conf'
+  iterations: 3
+  use_existing: True
+  rebuild_every_test: True
+  clusterid: "site-hybrid"
+  tmp_dir: "/tmp/cbt"
+  pool_profiles:
+    rep2:
+      pg_size: 32768
+      pgp_size: 32768
+      replication: 2
+    rep3:
+      pg_size: 16384
+      pgp_size: 16384
+      replication: 3
+    erasure3_2:
+      pg_size: 4096
+      pgp_size: 4096
+      replication: 'erasure'
+      erasure_profile: 'ec32'
+    erasure4_2:
+      pg_size: 8192
+      pgp_size: 8192
+      replication: 'erasure'
+      erasure_profile: 'ec42'
+    erasure8_2:
+      pg_size: 8192
+      pgp_size: 8192
+      replication: 'erasure'
+      erasure_profile: 'ec82'
+  erasure_profiles:
+    ec42:
+      erasure_k: 4
+      erasure_m: 2
+    ec82:
+      erasure_k: 8
+      erasure_m: 2
+    ec32:
+      erasure_k: 3
+      erasure_m: 2
+benchmarks:
+  radosbench:
+    time: 600
+    write_only: False # this seems to only do seq reads
+    pool_per_proc: False
+    op_size: [4194304,1048576]
+    #readmode: ['seq','rand']
+    readmode: ['rand','seq']
+    # Number of rados bench procceses generating concurrent_ops
+    concurrent_procs: 1
+    # Number of threads passed to rados bench cmd
+    concurrent_ops: 128
+    osd_ra: [0]
+    #pool_profile: ['erasure8_2','rep2','rep3']
+    pool_profile: ['erasure4_2']
